@@ -356,7 +356,8 @@ body {
 ═══════════════════════════════════════ */
 #pong-module .hero-title {
   font-size: clamp(58px, 12vw, 104px);
-  font-weight: 700; letter-spacing: -.055em; line-height: 1; padding-bottom: .12em; text-align: center;
+  font-weight: 700; letter-spacing: -.055em; line-height: 1.1; text-align: center;
+  padding-bottom: 0.08em;
   background: linear-gradient(148deg, #fff 0%, rgba(255,255,255,.68) 54%, rgba(155,155,205,.58) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   opacity: 0; animation: pongFadeUp .72s .16s cubic-bezier(.4,0,.2,1) forwards;
@@ -918,7 +919,7 @@ body {
 <!-- Name Input Screen -->
 <div id="aigNameScreen" class="aig-screen">
     <div class="aig-input-label">Dein Name</div>
-    <input type="text" id="aigNameField" class="aig-input-field" placeholder="..." maxlength="10" autocomplete="off">
+    <input type="text" id="aigNameField" class="aig-input-field" placeholder="..." maxlength="40" autocomplete="off">
     <button class="aig-btn-main" style="margin-top:32px" onclick="aigSetName()">Weiter</button>
 </div>
 
@@ -1074,7 +1075,7 @@ body {
     <div class="hof-panel">
       <div class="hof-list" id="hofList"></div>
     </div>
-    <button class="btn-next" onclick="PongGame.nextPlayer()">← Zum Startscreen</button>
+    <button class="btn-next" onclick="PongGame.nextPlayer()">← Nächster Spieler</button>
   </div>
 </div>
 
@@ -1217,7 +1218,7 @@ body {
     <div class="hof-panel">
       <div class="hof-scroll" id="vgHofList"></div>
     </div>
-    <button class="btn-next" onclick="vgNextPlayer()">← Zum Startscreen</button>
+    <button class="btn-next" onclick="vgNextPlayer()">← Nächster Spieler</button>
   </div>
 </div>
 
@@ -1305,11 +1306,19 @@ function aigDrawSpace() {
 }
 aigDrawSpace();
 
-// ── INTRO SEQUENCE (from File 3 — unchanged) ──
+// ── INTRO SEQUENCE ──
 function aigRunIntro() {
     const box = document.getElementById('aigIntroBox');
     const logo = document.getElementById('aigIntroLogo');
     const flash = document.getElementById('aigFlashBox');
+
+    // Reset state from any previous run
+    flash.style.opacity = '0';
+    logo.style.opacity = '0';
+    logo.style.transform = 'translate(-50%, -50%) scale(1)';
+    const oldCanvas = box.querySelector('canvas');
+    if (oldCanvas) oldCanvas.remove();
+
     box.style.display = 'block';
 
     const scene = new THREE.Scene();
@@ -1399,10 +1408,21 @@ function aigRunIntro() {
     anim();
 }
 
-// ── NAME INPUT (from File 3) ──
+// ── NAME INPUT ──
 function aigSetName() {
     const v = document.getElementById('aigNameField').value.trim();
-    aigPlayer = v || 'Peter';
+    if (!v) {
+        const field = document.getElementById('aigNameField');
+        field.style.borderBottomColor = 'rgba(255,69,58,0.8)';
+        field.placeholder = 'Bitte Name eingeben';
+        field.focus();
+        setTimeout(() => {
+            field.style.borderBottomColor = '';
+            field.placeholder = '...';
+        }, 1800);
+        return;
+    }
+    aigPlayer = v;
     document.getElementById('aigSelectLabel').textContent = 'Wähle ein Spiel, ' + aigPlayer;
     aigGo('aigSelectScreen');
 }
@@ -1969,7 +1989,7 @@ var PongGame = (function () {
       return new Date(ts).toLocaleDateString('de-DE',
         { day:'2-digit', month:'2-digit', year:'numeric' });
     };
-    list.innerHTML = all.slice(0, 12).map(function (x, i) {
+    list.innerHTML = all.slice(0, 10).map(function (x, i) {
       return '<div class="hof-row' + (i < 3 ? ' top3' : '') + '"'
         + ' style="animation-delay:' + (i*0.044).toFixed(3) + 's">'
         + '<span class="hof-medal">' + (medals[i]||'\u00B7') + '</span>'
@@ -2048,8 +2068,13 @@ var PongGame = (function () {
       touchPrev    = null;
       mouseActive  = false;
       mouseTargetY = -1;
-      // Go to Pong start screen
-      PongNav.go('startScreen');
+      // Return to main AI-Games start screen
+      document.getElementById('pong-module').classList.remove('game-active');
+      document.getElementById('vg-module').classList.remove('game-active');
+      document.getElementById('spaceCanvas').style.display = 'block';
+      document.getElementById('aigNameField').value = '';
+      aigPlayer = '';
+      aigGo('aigStartScreen');
     }
   };
 
@@ -2476,9 +2501,14 @@ function vgStartGame(first){
   vgShowScreen('vgGameScreen');
   vgResetBoard();
 }
-/* ── Integration: "← Zum Startscreen" → VG start screen ── */
+/* ── Integration: "← Nächster Spieler" → AI-Games Startscreen ── */
 function vgNextPlayer(){
-  vgShowScreen('vgStartScreen');
+  document.getElementById('pong-module').classList.remove('game-active');
+  document.getElementById('vg-module').classList.remove('game-active');
+  document.getElementById('spaceCanvas').style.display = 'block';
+  document.getElementById('aigNameField').value = '';
+  aigPlayer = '';
+  aigGo('aigStartScreen');
 }
 </script>
 
