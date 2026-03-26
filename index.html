@@ -1659,15 +1659,17 @@ var PongGame = (function () {
     var totalPoints = pScore + aScore;
     var predictionError, reactionDelay, speedFrac;
     if (totalPoints === 0) {
-      predictionError = 260;  reactionDelay = 500;  speedFrac = 0.55;
+      predictionError = 320;  reactionDelay = 650;  speedFrac = 0.45;
     } else if (totalPoints <= 2) {
-      predictionError = 180;  reactionDelay = 320;  speedFrac = 0.70;
+      predictionError = 220;  reactionDelay = 420;  speedFrac = 0.60;
     } else if (totalPoints === 3) {
-      predictionError = 110;  reactionDelay = 220;  speedFrac = 0.85;
+      predictionError = 140;  reactionDelay = 260;  speedFrac = 0.80;
     } else if (totalPoints === 4) {
-      predictionError =  70;  reactionDelay = 150;  speedFrac = 0.95;
+      predictionError = 80;   reactionDelay = 140;  speedFrac = 1.00;
+    } else if (totalPoints <= 6) {
+      predictionError = 40;   reactionDelay = 70;   speedFrac = 1.15;
     } else {
-      predictionError =  35;  reactionDelay = 100;  speedFrac = 1.00;
+      predictionError = 15;   reactionDelay = 30;   speedFrac = 1.25;
     }
     var reactionFrames = Math.max(1, Math.round(reactionDelay / (1000 / 60)));
     var speedCap       = speedFrac * P_MAX;
